@@ -1,5 +1,9 @@
+import java.time.LocalDate;
+
 public class Main {
     public static void main(String[] args) {
-        System.out.println("Hello world!");
+        LocalDate localDate = LocalDate.now();
+        localDate = localDate.minusDays(-3);
+        System.out.println(localDate.toString());
     }
 }

@@ -45,20 +45,22 @@ public class Axis extends BorderPane {
         chart.getData().clear();
     }
 
-    public void setxAxis(LocalDate localDate){
+    public void setxAxis(LocalDate localDate,int totalLength){
         xAxis.setTickLabelsVisible(true);
-        xAxis.setTickLabelFormatter(new Converter(localDate));
+        xAxis.setTickLabelFormatter(new Converter(localDate,totalLength));
     }
     class Converter extends StringConverter<Number>{
         LocalDate localDate;
-        public Converter(LocalDate localDate){
+        int totalLength;
+        public Converter(LocalDate localDate,int totalLength){
             this.localDate = localDate;
+            this.totalLength = totalLength;
             //System.out.println(localDate.toString());
         }
         @Override
         public String toString(Number object) {
             double val = object.doubleValue();
-            long days = (long)Math.round((val / (Math.PI * 2))*20);
+            long days = (long)Math.round((val / (Math.PI * 2))*this.totalLength);
             //System.out.println(localDate.toString());
             return String.format(localDate.plusDays(days).toString());
         }

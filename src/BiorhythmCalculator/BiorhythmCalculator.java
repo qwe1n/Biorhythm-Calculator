@@ -10,6 +10,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 import java.io.*;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 
@@ -17,6 +18,7 @@ public class BiorhythmCalculator extends Application {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
+        final int initLength = 20;
         final Axis axisPane = new Axis();
 
         final double emotionalPeriod = 28;
@@ -25,6 +27,8 @@ public class BiorhythmCalculator extends Application {
         final String physicalLabel = "体力";
         final double intellectualPeriod = 33;
         final String intellectualLabel = "智力";
+
+        Spinner<Integer> spinner = new Spinner<>(4,50,initLength,2);
 
         VBox rvb = new VBox();
         TitledPane tp1 = new TitledPane();
@@ -75,21 +79,22 @@ public class BiorhythmCalculator extends Application {
 
         btn.setOnAction( e -> {
             axisPane.reset();
-            axisPane.setxAxis(dp2.getValue());
 
-            double k1 = 20 / emotionalPeriod;
-            double k2 = 20 / physicalPeriod;
-            double k3 = 20 / intellectualPeriod;
+            axisPane.setxAxis(dp2.getValue(), spinner.getValue());
+
+            double k1 = spinner.getValue() / emotionalPeriod;
+            double k2 = spinner.getValue() / physicalPeriod;
+            double k3 = spinner.getValue() / intellectualPeriod;
 
             double A = 1;
             long d = ChronoUnit.DAYS.between(dp1.getValue(),dp2.getValue());
 
             double d1 =  k1 * d;
-            d1 *= Math.PI / 10;
+            d1 *= Math.PI * 2 / spinner.getValue();
             double d2 =  k2 * d;
-            d2 *= Math.PI / 10;
+            d2 *= Math.PI * 2 / spinner.getValue();
             double d3 =  k3 * d;
-            d3 *= Math.PI / 10;
+            d3 *= Math.PI * 2 / spinner.getValue();
             SineWave sw1 = new SineWave(A,k1,d1,emotionalLabel);
             SineWave sw2 = new SineWave(A,k2,d2,physicalLabel);
             SineWave sw3 = new SineWave(A,k3,d3,intellectualLabel);
@@ -113,7 +118,13 @@ public class BiorhythmCalculator extends Application {
             }
         });
 
-        rvb.getChildren().add(btn);
+        spinner.valueProperty().addListener(e -> {
+            btn.fire();
+        });
+
+        TitledPane tp3 = new TitledPane("横坐标范围长度",spinner);
+
+        rvb.getChildren().addAll(tp3,spinner,btn);
 
 
         Button btn1 = new Button("-1");
@@ -159,6 +170,7 @@ public class BiorhythmCalculator extends Application {
         axisPane.setRight(rvb);
 
         Node p = axisPane.getCenter();
+
         VBox vb2 = new VBox(p,hBox);
         vb2.setStyle("-fx-padding:5px");
         axisPane.setCenter(vb2);

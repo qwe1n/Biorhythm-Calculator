@@ -122,6 +122,15 @@ public class BiorhythmCalculator extends Application {
             btn.fire();
         });
 
+        dp1.valueProperty().addListener( e -> {
+            btn.fire();
+        });
+
+        dp2.valueProperty().addListener( e -> {
+            btn.fire();
+        });
+
+
         TitledPane tp3 = new TitledPane("横坐标范围长度",spinner);
 
         rvb.getChildren().addAll(tp3,spinner,btn);

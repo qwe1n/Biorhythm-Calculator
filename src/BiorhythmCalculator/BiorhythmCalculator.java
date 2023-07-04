@@ -7,12 +7,14 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
 import java.io.*;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 
 public class BiorhythmCalculator extends Application {
 
@@ -29,12 +31,12 @@ public class BiorhythmCalculator extends Application {
         final String intellectualLabel = "智力";
 
         Spinner<Integer> spinner = new Spinner<>(4,50,initLength,2);
-
         VBox rvb = new VBox();
         TitledPane tp1 = new TitledPane();
         tp1.setText("出生日期");
         DatePicker dp1 = new DatePicker();
 
+        //读取记忆
         String string = LocalDate.now().toString();
         String filename = "remember.txt";
         File f = new File(filename);
@@ -48,6 +50,55 @@ public class BiorhythmCalculator extends Application {
                 System.out.println("读取文件时发生错误！");
             }
         }
+
+        ArrayList<String> histories = new ArrayList<String>();
+        String hisFileName = "histories.txt";
+        TitledPane historyPane = new TitledPane();
+        historyPane.setText("历史记录");
+        VBox items = new VBox();
+        historyPane.setContent(items);
+
+        f = new File(hisFileName);
+        if (f.exists()){
+            try (BufferedReader reader = new BufferedReader(new FileReader(hisFileName))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    histories.add(line);
+                }
+            } catch (IOException e) {
+                System.out.println("读取文件时发生错误！");
+            }
+        }
+
+
+        for (String history : histories){
+            HBox item = new HBox();
+            Button itemText = new Button(history+"                       ");
+            Button deleteButton = new Button("X");
+            item.getChildren().addAll(itemText,deleteButton);
+            items.getChildren().add(item);
+            deleteButton.setOnAction(e -> {
+                items.getChildren().remove(item);
+                histories.remove(history);
+                File hf = new File("histories.txt");
+                try {
+                    hf.createNewFile();
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex);
+                }
+                try (FileWriter writer = new FileWriter(hf)) {
+                    for (String his : histories){
+                        writer.write(his+'\n');
+                    }
+                } catch (IOException ex) {
+                    System.out.println("写入文件时发生错误！");
+                }
+            });
+            itemText.setOnAction(e -> {
+                dp1.setValue(LocalDate.parse(history));
+            });
+        }
+
         LocalDate ld;
         try {
             ld = LocalDate.parse(string);
@@ -62,7 +113,7 @@ public class BiorhythmCalculator extends Application {
         HBox hb0 = new HBox(label,checkBox);
         VBox vb0 = new VBox(dp1,hb0);
         tp1.setContent(vb0);
-        rvb.getChildren().addAll(tp1);
+        rvb.getChildren().addAll(historyPane,tp1);
 
         TitledPane tp2 = new TitledPane();
         tp2.setText("查询日期");
@@ -114,6 +165,50 @@ public class BiorhythmCalculator extends Application {
                     writer.write(dp1.getValue().toString());
                 } catch (IOException ex) {
                     System.out.println("写入文件时发生错误！");
+                }
+
+                if ( !histories.contains(dp1.getValue().toString()) ){
+                    histories.add(dp1.getValue().toString());
+                    HBox item = new HBox();
+                    Button itemText = new Button(dp1.getValue().toString()+"                       ");
+                    Button deleteButton = new Button("X");
+                    item.getChildren().addAll(itemText,deleteButton);
+                    items.getChildren().add(item);
+                    String temp = dp1.getValue().toString();
+                    deleteButton.setOnAction(ee -> {
+                        items.getChildren().remove(item);
+                        histories.remove(temp);
+                        File hf = new File("histories.txt");
+                        try {
+                            hf.createNewFile();
+                        } catch (IOException ex) {
+                            throw new RuntimeException(ex);
+                        }
+                        try (FileWriter writer = new FileWriter(hf)) {
+                            for (String history : histories){
+                                writer.write(history+'\n');
+                            }
+                        } catch (IOException ex) {
+                            System.out.println("写入文件时发生错误！");
+                        }
+                    });
+                    itemText.setOnAction(ee -> {
+                        dp1.setValue(LocalDate.parse(temp));
+                    });
+
+                    File hf = new File("histories.txt");
+                    try {
+                        hf.createNewFile();
+                    } catch (IOException ex) {
+                        throw new RuntimeException(ex);
+                    }
+                    try (FileWriter writer = new FileWriter(hf)) {
+                        for (String history : histories){
+                            writer.write(history+'\n');
+                        }
+                    } catch (IOException ex) {
+                        System.out.println("写入文件时发生错误！");
+                    }
                 }
             }
         });
